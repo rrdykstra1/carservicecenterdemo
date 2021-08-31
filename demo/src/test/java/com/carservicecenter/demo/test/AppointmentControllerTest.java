@@ -64,7 +64,7 @@ public class AppointmentControllerTest {
     void deleteAppointment() throws Exception{
         String apptJson = getAppointmentJson();
 
-        mockMvc.perform(post ("/cscdemo/appointment/delete")
+        mockMvc.perform(delete ("/cscdemo/appointment/delete")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(apptJson))
@@ -76,7 +76,7 @@ public class AppointmentControllerTest {
     void updateAppointmentByCompleteStatus() throws Exception{
         String apptJson = getAppointmentJson();
 
-        mockMvc.perform(post ("/cscdemo/appointment/updateCompleteStatus")
+        mockMvc.perform(put ("/cscdemo/appointment/updateCompleteStatus")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(apptJson))

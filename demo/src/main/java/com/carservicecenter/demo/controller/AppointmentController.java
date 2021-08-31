@@ -42,12 +42,12 @@ public class AppointmentController {
         appointmentService.addAppointment(appointment);
     }
 
-    @PostMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void deleteAppointment(@RequestBody Appointment appointment){
         appointmentService.deleteAppointment(appointment);
     }
 
-    @PostMapping(path = "/updateCompleteStatus", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/updateCompleteStatus", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateAppointmentByCompleteStatus(@RequestBody Appointment appointment){
         appointmentService.updateAppointmentCompleteStatus(appointment);
     }
