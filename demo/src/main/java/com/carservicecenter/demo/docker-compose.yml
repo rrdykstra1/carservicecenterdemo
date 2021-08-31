@@ -1,0 +1,28 @@
+version: "1.29.1"
+    services:
+      app:
+        image: 'carservicecenterdemo.jar:latest'
+        build:
+          context: .
+          container_name: app
+          depends on:
+            db
+        environment:
+          SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/carservicecenterdemo
+          SPRING_DATASOURCE_USERNAME=admin
+          SPRING_DATASOURCE_PASSWORD=password
+          SPRING_JPA_HIBERNATE_DDL_AUTO=update
+        ports: 8080:8080
+
+    db:
+      image: postgres
+      container_name: db
+      environment:
+        POSTGRES_USER=admin
+        POSTGRES_PASSWORD=password
+
+      volumes:
+      ports:
+        - 5432:5432
+
+
