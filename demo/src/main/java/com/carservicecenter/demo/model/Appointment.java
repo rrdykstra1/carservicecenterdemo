@@ -50,6 +50,8 @@ public class Appointment {
         this.complete_status = completeStatus;
     }
 
+    public Appointment(){}
+
   public int getId() {
     return id;
   }

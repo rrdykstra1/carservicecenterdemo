@@ -37,27 +37,27 @@ public class AppointmentController {
         this.appointmentService = apptService;
     }
 
-    @PostMapping(path = "/new", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/new")
     public void addAppointment(@RequestBody Appointment appointment){
         appointmentService.addAppointment(appointment);
     }
 
-    @DeleteMapping(path = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/delete")
     public void deleteAppointment(@RequestBody Appointment appointment){
         appointmentService.deleteAppointment(appointment);
     }
 
-    @PutMapping(path = "/updateCompleteStatus", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(path = "/updateCompleteStatus")
     public void updateAppointmentByCompleteStatus(@RequestBody Appointment appointment){
         appointmentService.updateAppointmentCompleteStatus(appointment);
     }
 
-    @RequestMapping(path = "/getByVehicleId/{id}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/getByVehicleId/{id}", method = RequestMethod.GET)
     public List<Appointment> getAppointmentByVehicleId(@PathVariable("id") int id){
         return appointmentService.getAppointmentsByVehicleId(id);
     }
 
-    @RequestMapping(path = "/getByDateRange/{start}/{end}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/getByDateRange/{start}/{end}", method = RequestMethod.GET)
     public List<Appointment> getAppointmentsByDateRange(@PathVariable("start") Date start, @PathVariable("end") Date end){
         return appointmentService.getAppointmentsByDateRange(start, end);
     }

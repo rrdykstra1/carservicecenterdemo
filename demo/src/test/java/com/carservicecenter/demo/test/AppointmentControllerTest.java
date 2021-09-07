@@ -2,15 +2,16 @@ package com.carservicecenter.demo.test;
 
 import com.carservicecenter.demo.controller.AppointmentController;
 import com.carservicecenter.demo.model.Appointment;
+import com.carservicecenter.demo.repository.AppointmentRepository;
 import com.carservicecenter.demo.service.AppointmentService;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import mockit.Expectations;
-import mockit.Injectable;
 import mockit.Tested;
-import mockit.integration.junit5.JMockitExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -22,17 +23,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(JMockitExtension.class)
+@SpringBootTest
 public class AppointmentControllerTest {
 
-    @Injectable
+    @Autowired
     AppointmentService appointmentService;
+
+    @Autowired
+    AppointmentRepository appointmentRepository;
 
     @Tested
     AppointmentController appointmentController = new AppointmentController();
@@ -44,44 +46,47 @@ public class AppointmentControllerTest {
         this.mockMvc = MockMvcBuilders
                 .standaloneSetup(appointmentController).build();
         appointmentController.setAppointmentService(appointmentService);
+
+        //check to ensure everything is wired up
+        assertNotNull(appointmentController);
+        assertNotNull(appointmentService);
+        assertNotNull(appointmentRepository);
     }
+
 
     @Test
     void addAppointment() throws Exception{
-        String apptJson = getAppointmentJson();
-        //String json = TestUtils.getObjectAsJson(appointment);
+        String apptJson = createAppointmentJson();
+        assertNotNull(apptJson);
 
         mockMvc.perform(post ("/cscdemo/appointment/new")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(apptJson))
-                .andExpect(status().isOk())
-        .andExpect(jsonPath("$.success").value(true));;
-
+                .andExpect(status().isOk());
     }
 
     @Test
     void deleteAppointment() throws Exception{
-        String apptJson = getAppointmentJson();
+        String apptJson = createAppointmentJson();
+        assertNotNull(apptJson);
 
         mockMvc.perform(delete ("/cscdemo/appointment/delete")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(apptJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isOk());
     }
 
     @Test
     void updateAppointmentByCompleteStatus() throws Exception{
-        String apptJson = getAppointmentJson();
+        String apptJson = createAppointmentJson();
 
         mockMvc.perform(put ("/cscdemo/appointment/updateCompleteStatus")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(apptJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -91,18 +96,15 @@ public class AppointmentControllerTest {
         Appointment appointment = getAppointmentObject();
         List<Appointment> apptList = new ArrayList<Appointment>();
         apptList.add(appointment);
-        new Expectations(){{
-            appointmentService.getAppointmentsByVehicleId(appointment.getVehicleId());
-            result = apptList;
-        }};
+//        new Expectations(){{
+//            appointmentService.getAppointmentsByVehicleId(appointment.getVehicleId());
+//            result = apptList;
+//        }};
 
-        ResultActions resultActions = mockMvc.perform(get("/cscdemo/appointment/getByVehicleId/")
-                .param("id", String.valueOf(appointment.getVehicleId()))
+        ResultActions resultActions = mockMvc.perform(get("/cscdemo/appointment/getByVehicleId/{id}", 1)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF_8"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -113,29 +115,34 @@ public class AppointmentControllerTest {
         Appointment appointment = getAppointmentObject();
         List<Appointment> apptList = new ArrayList<Appointment>();
         apptList.add(appointment);
-        new Expectations(){{
-            appointmentService.getAppointmentsByDateRange(appointment.getApptDate(), appointment.getApptDate());
-            result = apptList;
-        }};
+//        new Expectations(){{
+//            appointmentService.getAppointmentsByDateRange(appointment.getApptDate(), appointment.getApptDate());
+//            result = apptList;
+//        }};
 
-        ResultActions resultActions = mockMvc.perform(get("/cscdemo/appointment/getByDateRange/")
-                .param("start", String.valueOf(appointment.getApptDate().getTime()))
-                .param("end", String.valueOf(appointment.getApptDate().getTime()))
+        ResultActions resultActions = mockMvc.perform(get("/cscdemo/appointment/getByDateRange/{start}/{end}",
+                appointment.getApptDate(),
+                appointment.getApptDate())
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF_8"))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isOk());
     }
 
-    //creates custom json string because objectmapper returns wrong order
-    //even though JsonProperty order is defined on object Appointment
-    private String getAppointmentJson(){
-        Appointment appointment = getAppointmentObject();
-        return "{\"vehicle_id\":" + appointment.getVehicleId() + ", \"service_desc\":"
-                + "\"" + appointment.getServiceDesc() + "\"" +  ", \"appt_date\":" + appointment.getApptTime().getTime() + ", \"appt_time\":"
-                + "\"" + appointment.getApptTime() + "\"" + ", \"price\":" + appointment.getPrice() + ", \"complete_status\":"
-                + appointment.getCompleteStatus() + "}";
+
+    //creates Appointment object Json
+    private String createAppointmentJson(){
+        Appointment appt = getAppointmentObject();
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            String apptJson = objectMapper.writeValueAsString(appt);
+            return apptJson;
+        }catch(Exception e) {
+            //could not write object, will return null
+        }
+        return null;
+
     }
 
     private Appointment getAppointmentObject(){
